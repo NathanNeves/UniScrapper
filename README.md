@@ -7,7 +7,7 @@ Desenvolvi essa Biblioteca com o intuito de raspar dados do Portal de Pesquisa C
 
 # Documentação:
 A função getData() retorna um array de objetos com os seguintes campos:
-  - #### Titulo: Titulo do Projeto
+  - ### Titulo: Titulo do Projeto
   - ### Unidade : Unidade acadêmica Responsável pelo projeto
   - ### Coordenador: Coordenador Responsável pelo projeto
   - ### CNPQ: Grupo do CNPQ que está cuidando do projeto
