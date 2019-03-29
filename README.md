@@ -13,7 +13,7 @@ Desenvolvi essa Biblioteca com o intuito de raspar dados do Portal de Pesquisa C
 # Documentação:
 A função getData() retorna um array de objetos com os seguintes campos:
   - ### Titulo: Titulo do Projeto
-  - ### Unidade : Unidade acadêmica Responsável pelo projeto
-  - ### Coordenador: Coordenador Responsável pelo projeto
-  - ### CNPQ: Grupo do CNPQ que está cuidando do projeto
+  - ### Unidade : Departamento Responsável pelo projeto
+  - ### Coordernador: Coordernador Responsável pelo projeto
+  - ### Grupo de Pesquisa: Grupo ao qual o projeto está vinculado
 
