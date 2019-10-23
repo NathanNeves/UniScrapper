@@ -9,7 +9,6 @@ class SqlMethods{
             database: "unirio",
             gracefulExit: true
         };
-        this.conn = mysql.createPool(this.config); 
     }
     
      destroyConnection(){
@@ -20,26 +19,43 @@ class SqlMethods{
     
     
      async attTabela(array){
-        
-        this.conn.query('TRUNCATE dados',(err,results,fields)=>{
-            if(err){
-                return console.log(err.message);
-            }
-            console.log("Linhas afetadas: "+ results.affectedRows);
-            this._inserirTabela(array);
+        const conn = mysql.createConnection(this.__connectionString);
+        return new Promise((res,reject)=>{
+            conn.query('TRUNCATE dados',(err,results,fields)=>{
+                if(err){
+                        reject(err);
+                }
+               res(results);
+               conn.end();
+            
+            })
         });
-      }
-      _inserirTabela(array){
-            this.conn.query('INSERT INTO dados(titulo,departamento,coordenador,grupoCnpq,camara,situacao,ano,cpf) VALUES ?',[array],(err,results,fields)=>{
-             if(err){
-                return console.log(err.message);
-            }
-            console.log('Linhas Inseridas: '+ results.affectedRows);
-                this.destroyConnection();
-                process.exit();
+    }
+     async  _inserirTabela(array){
+        const conn = mysql.createConnection(this.__connectionString);
+            return new Promise((res,reject)=>{
+                conn.query('INSERT INTO dados(titulo,departamento,coordenador,grupoCnpq,camara,situacao,ano,cpf,numSerie) VALUES ?',[array],(err,results,fields)=>{
+                    if(err){
+                       reject(err);
+                   }
+                    res(results)
+                    conn.end();
+                   })
             });
            
       }
+      async pesquisardepartamento(data){
+        const conn = mysql.createConnection(this.__connectionString);
+        return new Promise((resolve,reject)=>{
+            conn.query('SELECT * FROM metadata WHERE departamento = ?',[data],(err,results,fields)=>{
+                if(err){
+                    reject(err);
+                }
+                resolve(results);
+                conn.end();
+            });
+        });
+}
     
 }
 module.exports = SqlMethods;

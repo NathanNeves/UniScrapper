@@ -8,55 +8,46 @@ class Uniscrapper{
                 this.url = "http://sistemas.unirio.br/projetos/projeto/index?ID_PROJETO=";
 
         }
-        //Função que pega os Dados de Pesquisa da Unirio e retorna um array de objetos
-        async getData(number1){
-                        const links = await this.generateLinks(number1);
-                        let dados = new Array(); 
-                        const databar = new loading.Bar({stopOnComplete:true,position:'center',clearOnComplete: true,
-                        format: 'Requisitando dados: [{bar}] {percentage}% | Tempo estimado: {eta}s | {value}/{total}'});
-                        databar.start(links.length,0);
-                        for(const index in links){
-                                databar.update(index);
-                        let response = await axios.get(links[index]);
-                        const $ = cheerio.load(response.data);
-                        const titulo = $('.table tbody td').eq(1).text()
-                        const unidade = $('.table tbody td').eq(5).text();
-                        const situacao = $('.table tbody td').eq(11).text();
-                        const ano = $('.table tbody td').eq(15).text();
-                        const coordenador = $('.table tbody td').eq(7).text().slice(0,$('.table tbody td').eq(7).text().indexOf('('));
-                        const camarapesquisa = $('table:nth-child(4) tbody td:contains("Câmara de pesquisa")').next().text();
-                        const cnpq = $('table:nth-child(4) tbody td:contains("Grupo do CNPq")').next().text();
-                        const cpf = await this.getCpf(coordenador);
-                                if(cpf != ""){
-                                dados.push([titulo,unidade,coordenador,cnpq,camarapesquisa,situacao,ano,cpf])
-                                }
-                        }
-                        return dados;
-                         
-                        
+        async gerarid(cpf,departamento,ano,id){
+                const result = await conn.pesquisardepartamento(departamento);
+                if(result.length >0){
+                const CodUnidade = result[0].UnidadeAcademicaCod.split("-")[1];
+                const CodEscola = result[0].Escola.split("-")[1];
+                const Sigla = result[0].Sigla;
+                const Id = CodUnidade+"."+CodEscola+"."+Sigla+"-"+id+"."+cpf+'.'+ano;
+                console.log(Id);
+                return Id;
+            }else{
+                return null;
+            }    
         }
-        //Função que verifica quais ids existem ou não dentro do banco de dados
-       
-        //Função que cria um array com diversos números de Id existentes ou não
-        async generateLinks(n1){
-                let links = new Array();
-                const bar = new loading.Bar({stopOnComplete:true,position:'center',clearOnComplete: true,
-                format: 'Gerando links: [{bar}] {percentage}% | Tempo estimado: {eta}s | {value}/{total}'});
-                bar.start(n1,0);
+        async getData(n1){
+                let dados = new Array()
                 for(let n =0;n<=n1;n++){
-                        bar.update(n);
                         try{   
                                 let response = await axios.get(this.url+n);
                                 if(response.status == 200){
-                                        
-                                        links.push(this.url+n);
+                                        const $ = cheerio.load(response.data);
+                                        const titulo = $('.table tbody td').eq(1).text()
+                                        const unidade = $('.table tbody td').eq(5).text();
+                                        const situacao = $('.table tbody td').eq(11).text();
+                                        const ano = $('.table tbody td').eq(15).text();
+                                        const coordenador = $('.table tbody td').eq(7).text().slice(0,$('.table tbody td').eq(7).text().indexOf('('));
+                                        const camarapesquisa = $('table:nth-child(4) tbody td:contains("Câmara de pesquisa")').next().text();
+                                        const cnpq = $('table:nth-child(4) tbody td:contains("Grupo do CNPq")').next().text();
+                                        const cpf = await this.getCpf(coordenador);
+                                        if(cpf != ""){
+                                                const numSerie = await gerarid(cpf,unidade,ano,n);
+                                                dados.push([titulo,unidade,coordenador,cnpq,camarapesquisa,situacao,ano,cpf,numSerie])
+                                        }  
+                                
                                 }
                         }
-                              catch(e){
+                        catch(e){
                                       
-                              }
+                        }
                 }
-                return links;
+                return dados;
         }
         async getCpf(pessoa){
                 let query = pessoa.split(" ");
